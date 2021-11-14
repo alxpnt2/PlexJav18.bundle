@@ -3,7 +3,7 @@
 Finds Japanese Adult Video (JAV) metadata for Plex from [R18.com](https://www.r18.com/). 
 
 ## Installation
-Click [here](https://github.com/alxpnt2/PlexJav18.bundle/archive/master.zip) to download a zip file containing the latest version of plugin, or click the green "Clone or download" button above. Extract the Jav18.bundle folder from the zip file and place it in your Plex server's plugins folder. You can find out where that is [here](https://support.plex.tv/articles/201106098-how-do-i-find-the-plug-ins-folder/). Close your Plex server and restart it, and it should be selectable as an agent (called "Jav18") in movie and video libraries.
+Click [here](https://github.com/alxpnt2/PlexJav18.bundle/archive/master.zip) to download a zip file containing the latest version of plugin, or click the green "Clone or download" button above. Extract the Jav18.bundle folder from the zip file (within the PlexJav18.bundle-master folder) and place it in your Plex server's plugins folder. You can find out where that is [here](https://support.plex.tv/articles/201106098-how-do-i-find-the-plug-ins-folder/). Close your Plex server and restart it, and it should be selectable as an agent (called "Jav18") in movie and video libraries.
 
 ## How to Use
 It searches the R18 database using the release label and number associated with the video (e.g. XYZ-123). It gets this info from the filename, so ensure that your video files have it in their name. I use and have tested the following folder structure for my library:
