@@ -34,7 +34,7 @@ HDR = {
 
 def get_search_url(release_id):
     encodedId = urllib2.quote(release_id)
-    return SEARCH_URL + encodedId
+    return SEARCH_URL + encodedId + '/'
 
 
 def get_api_url(id):
