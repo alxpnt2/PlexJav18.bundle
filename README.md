@@ -26,5 +26,15 @@ R18 isn't 100% complete, so there may be some releases that won't have their ful
 
 JavLibrary seems to have a more complete database, but as of yet I haven't found a good way of scraping that website.
 
+## Troubleshooting
+### Why aren't I getting any metadata?
+Make sure that you are using the correct folder structure (see above) and that your videos are named for the release number (ABC-123.mp4). If your videos are named correctly and still aren't having metadata populated for them, make sure that you can find them on R18 and 141JAV.
+
+### I'm getting title information, but the poster isn't loading or the poster is low res.
+The API that generates the high-res poster doesn't have 100% up-time, so if you're getting a low-res poster, try waiting a few minutes and trying again. 
+
+### I'm still not getting the right poster or my metadata isn't loading.
+If there isn't already an issue written up for your problem on the issues tab, write one up and attach your Jav18 plug-in log to the issue. Find the log folder using [this support article](https://support.plex.tv/articles/200250417-plex-media-server-log-files/). Once you are in the log folder, navigate into `PMS Plugin Logs` and grab the file called `com.plexapp.agents.jav18.log`.
+
 ## Credits
 This plugin was based on PhoenixPlexCode's Data18-Phoenix.bundle plugin [here](https://github.com/PhoenixPlexCode/Data18-Phoenix.bundle).
