@@ -9,6 +9,9 @@ from datetime import datetime
 from cStringIO import StringIO
 import inspect
 from pprint import pprint
+from site_r18 import *
+from site_141jav import *
+from site_avwiki import *
 
 try:
     from html import unescape  # python 3.4+
@@ -19,26 +22,7 @@ except ImportError:
         from HTMLParser import HTMLParser  # python 2.x
     unescape = HTMLParser().unescape
 
-SEARCH_URL = 'https://www.r18.com/common/search/searchword='
-API_URL = 'https://www.r18.com/api/v4f/contents/[ID]?lang=en&unit=USD'
-IMAGE_CROPPER_URL = "https://rootanya.com/image-croper/image/crop?imageUrl="
-
-HDR = {
-    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-    'Accept-Encoding': 'none',
-    'Accept-Language': 'en-US,en;q=0.8',
-    'Connection': 'keep-alive'}
-
-
-def get_search_url(release_id):
-    encodedId = urllib2.quote(release_id)
-    return SEARCH_URL + encodedId + '/'
-
-
-def get_api_url(id):
-    return API_URL.replace("[ID]", id)
+IMAGE_CROPPER_URL = "https://jav18api.herokuapp.com/crop-poster?poster-url="
 
 
 def title_id_to_r18_id(id):
@@ -56,6 +40,21 @@ def unencode_file_name(filename):
     filename = filename.replace("%2F", "/")
     filename = filename.replace("%2E", ".")
     return filename
+
+
+def get_cache_file_name(filename, relative_directory=""):
+    return os.path.abspath(os.path.join(CACHE_PATH, relative_directory, filename))
+
+
+def save_url_to_cache(url, filename, relative_directory=""):
+    downloaded = HTTP.Request(url, headers=HDR, timeout=60, cacheTime=CACHE_1DAY).content
+    relative_filename = os.path.join(relative_directory, filename)
+    relative_directory, filename = os.path.split(relative_filename)
+    absolute_directory = os.path.abspath(os.path.join(CACHE_PATH, relative_directory))
+    Log("Saving '" + filename + "' to " + absolute_directory)
+    if not os.path.exists(absolute_directory):
+        os.makedirs(absolute_directory)
+    Data.Save(relative_filename, downloaded)
 
 
 class Jav18Agent(Agent.Movies):
@@ -79,23 +78,13 @@ class Jav18Agent(Agent.Movies):
         Log("Release ID:    " + str(release_id))
         Log("Release Title: " + str(release_title))
 
-        url = get_search_url(release_id)
-        Log(url)
-        #req = urllib2.Request(url, headers=HDR)
-        #con = urllib2.urlopen(req)
-        #web_byte = con.read()
-        #webpage = web_byte.decode('utf-8')
-        searchResults = HTML.ElementFromURL(url)
-        Log("Got search results")
-        for searchResult in searchResults.xpath('//li[contains(@class, "item-list")]'):
-            content_id = searchResult.get("data-content_id")
-            id = searchResult.xpath('a//p//img')[0].get("alt")
-            title = searchResult.xpath('a//dl//dt')[0].text_content()
-            if title.startswith("Sale"):
-                title = title[4:]
-            Log(id + " : " + title)
-            score = 100 - Util.LevenshteinDistance(id.lower(), release_id.lower())
-            results.Append(MetadataSearchResult(id=content_id, name="[" + id + "] " + title, score=score, lang=lang))
+        searchers = [Site141Jav()]
+
+        for searcher in searchers:
+            searcher_tag = "" if len(searchers) <= 1 else "[" + searcher.tag() + "] "
+            for result in searcher.search(release_id):
+                Log(searcher_tag + str(result))
+                results.Append(MetadataSearchResult(id=result.id, name=searcher_tag + result.title, score=result.score, lang=lang))
 
         results.Sort('score', descending=True)
         Log('******* done search ****** ')
@@ -104,69 +93,86 @@ class Jav18Agent(Agent.Movies):
         Log('****** MEDIA UPDATE *******')
         Log("ID: " + str(metadata.id))
 
-        content_id = title_id_to_r18_id(metadata.id)
-        url = get_api_url(content_id)   
-        Log(url)
-        req = urllib2.Request(url, headers=HDR)
-        con = urllib2.urlopen(req)
-        web_byte = con.read()
-        webpage = web_byte.decode('utf-8')
-        data = json.loads(webpage)["data"]
-        #Log(data)
+        id_gatherers = [SiteAVWiki()]
+        ids = None
+        for gatherer in id_gatherers:
+            ids = gatherer.get_site_ids(metadata.id)
+            if ids is not None:
+                break
+        if ids is None:
+            Log("Unable to find site ids for '" + metadata.id + "'. Trying to guess ids.")
+            ids = ContentIds(metadata.id)
+            ids.try_to_guess_ids()
 
-        id = data["dvd_id"]
-        title = data["title"]
-        metadata.title = None if title is None else "[" + id + "] " + title
-        metadata.studio = data["maker"]["name"]
-        director_info = data["director"]
-        metadata.directors.clear()
-        if director_info is not None:
-            director = metadata.directors.new()
-            director.name = director_info
-        date = data["release_date"]
-        date_object = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
-        metadata.originally_available_at = date_object
+        updaters = [SiteR18(), Site141Jav()]
+        results = MetadataResults()
+        for updater in updaters:
+            result = updater.get_data(ids)
+            if result is not None:
+                results.results.append(result)
+
+        if results.no_results_founds():
+            Log("Could not gather any metadata!")
+            Log("***** UPDATE FAILED! ***** ")
+            return
+
+        metadata.title = "[" + metadata.id + "] " + results.get_title()
+        metadata.studio = results.get_studio()
+        metadata.originally_available_at = results.get_release_date()
         metadata.year = metadata.originally_available_at.year
 
-        # Collections
+        metadata.directors.clear()
+        for director_name in results.get_directors():
+            director = metadata.directors.new()
+            director.name = director_name
+
         metadata.collections.clear()
-        series = data["series"]
-        if series is not None:
-            metadata.collections.add(series["name"])
+        for collection in results.get_collections():
+            metadata.collections.add(collection)
+        metadata.collections.add(metadata.id.split("-")[0])
 
-        # Genres
         metadata.genres.clear()
-        for category in data["categories"]:
-            category_name = category["name"]
-            if "Featured" in category_name or "Sale" in category_name:
-                continue
-            metadata.genres.add(category_name)
+        for genre in results.get_genres():
+            metadata.genres.add(genre)
 
-        # Actors
         metadata.roles.clear()
-        actors = data["actresses"]
-        if len(actors) > 0:
-            for actor in actors:
-                role = metadata.roles.new()
-                role.name = actor["name"]
-                role.photo = actor["image_url"]
-                Log("actor: " + role.name)
-        else:
-            Log("no actors found")
+        for actor in results.get_roles():
+            role = metadata.roles.new()
+            role.name = actor.name
+            role.photo = actor.image_url
 
         # Posters/Background
-        full_url = data["images"]["jacket_image"]["large"]
-        half_url = IMAGE_CROPPER_URL + full_url
-        Log("Full URL: " + full_url)
-        metadata.posters[half_url] = Proxy.Preview(
-            HTTP.Request(half_url, headers={'Referer': 'http://www.google.com'}).content, sort_order=1)
-        metadata.art[full_url] = Proxy.Preview(
-            HTTP.Request(full_url, headers={'Referer': 'http://www.google.com'}).content, sort_order=1)
-        gallery = data["gallery"]
-        Log("background images: " + str(len(gallery)))
-        for scene in gallery:
-            Log("BackgroundURL: " + scene["large"])
-            metadata.art[scene["large"]] = Proxy.Preview(
-                HTTP.Request(scene["large"], headers={'Referer': 'http://www.google.com'}).content, sort_order=1)
+        front_cover_high_rez = results.get_front_cover_high_rez()
+        front_cover_low_rez = results.get_front_cover_low_rez()
+        full_cover_high_rez = results.get_full_cover_high_rez()
+
+        poster_set = False
+        if front_cover_high_rez is not None:
+            metadata.posters[front_cover_high_rez] = Proxy.Preview(
+                HTTP.Request(front_cover_high_rez, headers={'Referer': 'http://www.google.com'}).content, sort_order=1)
+            poster_set = True
+
+        if not poster_set and full_cover_high_rez is not None:
+            try:
+                cropped_url = IMAGE_CROPPER_URL + full_cover_high_rez
+                metadata.posters[cropped_url] = Proxy.Preview(HTTP.Request(cropped_url,
+                                                                           headers={
+                                                                               'Referer': 'http://www.google.com'}).content,
+                                                              sort_order=1)
+                poster_set = True
+            except Exception as e:
+                Log("Error trying to get cropped image url")
+                Log(str(e))
+
+        if not poster_set and front_cover_low_rez is not None:
+            metadata.posters[front_cover_low_rez] = Proxy.Preview(
+                HTTP.Request(front_cover_low_rez, headers={'Referer': 'http://www.google.com'}).content, sort_order=1)
+
+        if full_cover_high_rez is not None:
+            metadata.art[full_cover_high_rez] = Proxy.Preview(
+                HTTP.Request(full_cover_high_rez, headers={'Referer': 'http://www.google.com'}).content, sort_order=1)
+        for art in results.get_art():
+            metadata.art[art] = Proxy.Preview(
+                HTTP.Request(art, headers={'Referer': 'http://www.google.com'}).content, sort_order=1)
 
         Log('******* done update ****** ')

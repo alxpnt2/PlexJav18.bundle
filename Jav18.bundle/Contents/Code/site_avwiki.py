@@ -1,0 +1,63 @@
+from site import *
+
+
+SEARCH_URL = "https://av-wiki.net/?s=[id]&post_type=product"
+DETAIL_URL = "https://av-wiki.net/"
+
+
+def get_detail_url(release_id):
+    encodedId = urllib2.quote(release_id)
+    return DETAIL_URL + encodedId + "/"
+
+
+def get_search_url(release_id):
+    encodedId = urllib2.quote(release_id)
+    return SEARCH_URL.replace("[id]", encodedId)
+
+
+class SiteAVWiki(Site):
+    def tag(self):
+        return "AV-Wiki"
+
+    def do_search(self, release_id):
+
+
+        pass
+
+    def can_get_site_ids(self):
+        return True
+
+    def do_get_site_ids(self, release_id):
+        page = None
+        try:
+            url = get_detail_url(release_id)
+            self.DoLog(url)
+            page = HTML.ElementFromURL(url)
+        except:
+            self.DoLog("AV-Wiki doesn't use release id '" + release_id + "' in page url, trying searching for it")
+            url = get_search_url(release_id)
+            self.DoLog(url)
+            search_page = HTML.ElementFromURL(url)
+            first_result = search_page.xpath('//div[contains(@class, "post")]/article//div[contains(@class, "read-more")]/a')[0]
+            url = first_result.get("href")
+            self.DoLog(url)
+            page = HTML.ElementFromURL(url)
+
+        results = []  # List[SearchResult]
+        ids = ContentIds(release_id)
+        for detail_key in page.xpath('//dl[contains(@class, "dltable")]/dt'):
+            key = detail_key.text_content().strip()
+            value = detail_key.xpath('following-sibling::dd')[0].text_content().strip()
+            self.DoLog(key + " : " + value)
+            if "FANZA品番" == key:
+                ids.fanza_id = value
+            if "MGS品番" == key:
+                ids.mgs_id = value
+            if key in ("SOKMIL品番", "ソクミル品番"):
+                ids.sokmil_id = value
+            if "DUGA品番" == key:
+                ids.duga_id = value
+        return ids
+
+    def do_get_data(self, release_id):
+        pass
