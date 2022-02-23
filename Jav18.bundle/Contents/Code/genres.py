@@ -75,14 +75,14 @@ GENRE_MAP = {
 }
 
 GENRE_IGNORE_LIST = [
-    "Sale", "Hi-Def", "4K", "Actress", "AVOPEN", "AV OPEN", "FANZA", "Cinema", "2010s", "Other", "Quality",
-    "Daydreamers", "Blu-ray"
+    "sale", "hi-def", "4k", "actress", "avopen", "av open", "fanza", "cinema", "2010s", "other", "quality",
+    "daydreamers", "blu-ray", "tv"
 ]
 
 
 def get_real_genre(genre):
     for ignore in GENRE_IGNORE_LIST:
-        if ignore in genre:
+        if ignore in genre.lower():
             return None
     if genre in GENRE_MAP:
         return GENRE_MAP[genre]

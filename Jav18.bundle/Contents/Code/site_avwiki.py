@@ -19,10 +19,25 @@ class SiteAVWiki(Site):
     def tag(self):
         return "AV-Wiki"
 
+    def can_search(self):
+        return Prefs["search_avwiki"]
+
     def do_search(self, release_id):
-
-
-        pass
+        url = get_search_url(release_id)
+        self.DoLog(url)
+        search_page = HTML.ElementFromURL(url)
+        results = []  # List[SearchResult]
+        for searchResult in search_page.xpath('//div[contains(@class, "post")]/article'):
+            id = searchResult.xpath('//li/i[contains(@class, "fa-circle-o")]/..')[0].text_content().strip()
+            title = searchResult.xpath('//h2/a')[0].text_content().strip()
+            self.DoLog(id + " : " + title)
+            score = 100 - Util.LevenshteinDistance(id.lower(), release_id.lower())
+            result = SearchResult()
+            result.id = id
+            result.title = "[" + id + "] " + title
+            result.score = score
+            results.append(result)
+        return results
 
     def can_get_site_ids(self):
         return True
@@ -59,5 +74,5 @@ class SiteAVWiki(Site):
                 ids.duga_id = value
         return ids
 
-    def do_get_data(self, release_id):
+    def do_get_data(self, ids, language):
         pass

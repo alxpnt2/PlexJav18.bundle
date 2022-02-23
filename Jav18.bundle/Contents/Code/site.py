@@ -160,12 +160,12 @@ class Site:
     def can_get_data(self):
         return False
 
-    def do_get_data(self, ids):
+    def do_get_data(self, ids, language):
         raise NotImplementedError
 
-    def get_data(self, ids):
+    def get_data(self, ids, language):
         try:
-            return self.do_get_data(ids)
+            return self.do_get_data(ids, language)
         except Exception as e:
             self.DoLog("Error trying to update metadata for " + ids.release_id)
             self.DoLog(str(e))

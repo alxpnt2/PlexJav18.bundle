@@ -3,7 +3,9 @@ import urllib2
 import json
 
 SEARCH_URL = 'https://www.r18.com/common/search/searchword='
-API_URL = 'https://www.r18.com/api/v4f/contents/[ID]?lang=en&unit=USD'
+API_URL = 'https://www.r18.com/api/v4f/contents/[ID]?lang=[LANG]&unit=USD'
+
+LANG_CODES = {"English": "en", "Chinese": "zh"}
 
 
 def get_search_url(release_id):
@@ -11,8 +13,8 @@ def get_search_url(release_id):
     return SEARCH_URL + encodedId + '/'
 
 
-def get_api_url(id):
-    return API_URL.replace("[ID]", id)
+def get_api_url(id, language):
+    return API_URL.replace("[ID]", id).replace("[LANG]", language)
 
 
 class SiteR18(Site):
@@ -21,7 +23,7 @@ class SiteR18(Site):
         return "R18"
 
     def can_search(self):
-        return True
+        return Prefs["search_r18"]
 
     def do_search(self, release_id):
         url = get_search_url(release_id)
@@ -37,20 +39,25 @@ class SiteR18(Site):
             self.DoLog(id + " : " + title)
             score = 100 - Util.LevenshteinDistance(id.lower(), release_id.lower())
             result = SearchResult()
-            result.id = content_id
+            result.id = id
             result.title = "[" + id + "] " + title
             result.score = score
             results.append(result)
         return results
 
-    def do_get_data(self, ids):
+    def can_get_data(self):
+        return True
+
+    def do_get_data(self, ids, language):
         result = MetadataResult()
 
         if ids.fanza_id is None:
             raise self.GetException("No Fanza ID present")
+        language = "en" if language not in LANG_CODES else LANG_CODES[language]
+        self.DoLog(language)
         data = None
         try:
-            url = get_api_url(ids.fanza_id)
+            url = get_api_url(ids.fanza_id, language)
             self.DoLog(url)
             req = urllib2.Request(url, headers=HDR)
             con = urllib2.urlopen(req)

@@ -20,7 +20,7 @@ class Site141Jav(Site):
         return "141Jav"
 
     def can_search(self):
-        return True
+        return Prefs["search_141jav"]
 
     def do_search(self, release_id):
         url = get_search_url(release_id)
@@ -42,7 +42,7 @@ class Site141Jav(Site):
     def can_get_data(self):
         return True
 
-    def do_get_data(self, ids):
+    def do_get_data(self, ids, language):
         url = get_detail_url(ids.release_id)
         self.DoLog(url)
         page = HTML.ElementFromURL(url)

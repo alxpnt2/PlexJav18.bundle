@@ -9,6 +9,8 @@ from datetime import datetime
 from cStringIO import StringIO
 import inspect
 from pprint import pprint
+
+from site_javdb import *
 from site_r18 import *
 from site_141jav import *
 from site_avwiki import *
@@ -23,6 +25,8 @@ except ImportError:
     unescape = HTMLParser().unescape
 
 IMAGE_CROPPER_URL = "https://jav18api.herokuapp.com/crop-poster?poster-url="
+
+SERVICES = [SiteR18(), SiteJavDB(), SiteAVWiki(), Site141Jav()]
 
 
 def title_id_to_r18_id(id):
@@ -78,22 +82,24 @@ class Jav18Agent(Agent.Movies):
         Log("Release ID:    " + str(release_id))
         Log("Release Title: " + str(release_title))
 
-        searchers = [Site141Jav()]
+        searchers = [s for s in SERVICES if s.can_search()]
 
         for searcher in searchers:
             searcher_tag = "" if len(searchers) <= 1 else "[" + searcher.tag() + "] "
             for result in searcher.search(release_id):
                 Log(searcher_tag + str(result))
-                results.Append(MetadataSearchResult(id=result.id, name=searcher_tag + result.title, score=result.score, lang=lang))
+                results.Append(MetadataSearchResult(id=searcher.tag() + "#" + result.id, name=searcher_tag + result.title, score=result.score, lang=lang))
 
         results.Sort('score', descending=True)
         Log('******* done search ****** ')
 
     def update(self, metadata, media, lang):
         Log('****** MEDIA UPDATE *******')
+        Log("Result: " + str(metadata.id))
+        searcher_tag, metadata.id = metadata.id.split("#")
         Log("ID: " + str(metadata.id))
 
-        id_gatherers = [SiteAVWiki()]
+        id_gatherers = [s for s in SERVICES if s.can_get_site_ids()]
         ids = None
         for gatherer in id_gatherers:
             ids = gatherer.get_site_ids(metadata.id)
@@ -104,10 +110,10 @@ class Jav18Agent(Agent.Movies):
             ids = ContentIds(metadata.id)
             ids.try_to_guess_ids()
 
-        updaters = [SiteR18(), Site141Jav()]
+        updaters = [s for s in SERVICES if s.can_get_data()]
         results = MetadataResults()
         for updater in updaters:
-            result = updater.get_data(ids)
+            result = updater.get_data(ids, Prefs["language"])
             if result is not None:
                 results.results.append(result)
 
