@@ -75,14 +75,14 @@ class SiteJavDB(Site):
                 result.title = value
             if "genre" in key:
                 for genre in value.split(","):
-                    result.genres.append(genre)
+                    result.genres.append(genre.strip())
             if "series" in key:
                 result.collections.append(value)
             if "studio" in key:
                 result.studio = value
             if "director" in key:
                 for director in value.split(","):
-                    result.directors.append(director)
+                    result.directors.append(director.strip())
             if "date" in key:
                 result.release_date = datetime.strptime(value, "%Y-%m-%d")
 
@@ -92,6 +92,7 @@ class SiteJavDB(Site):
             role.image_url = actress_element.xpath('//img')[0].get("src")
             result.roles.append(role)
 
-        result.full_cover_high_rez = page.xpath('//tr[contains(@class, "moviecovertb")]//img')[0].get("src")
+        # Sometimes JavDB images can't be loaded
+        # result.full_cover_high_rez = page.xpath('//tr[contains(@class, "moviecovertb")]//img')[0].get("src")
 
         return result

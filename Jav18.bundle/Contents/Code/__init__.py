@@ -14,6 +14,8 @@ from site_javdb import *
 from site_r18 import *
 from site_141jav import *
 from site_avwiki import *
+from site_onejav import *
+from site_javguru import *
 
 try:
     from html import unescape  # python 3.4+
@@ -26,7 +28,7 @@ except ImportError:
 
 IMAGE_CROPPER_URL = "https://jav18api.herokuapp.com/crop-poster?poster-url="
 
-SERVICES = [SiteR18(), SiteJavDB(), SiteAVWiki(), Site141Jav()]
+SERVICES = [SiteR18(), SiteJavGuru(), SiteJavDB(), SiteAVWiki(), Site141Jav(), SiteOneJav()]
 
 
 def title_id_to_r18_id(id):
@@ -122,7 +124,7 @@ class Jav18Agent(Agent.Movies):
             Log("***** UPDATE FAILED! ***** ")
             return
 
-        metadata.title = "[" + metadata.id + "] " + results.get_title()
+        metadata.title = "[" + metadata.id + "] " + ("" if results.get_title() is None else results.get_title())
         metadata.studio = results.get_studio()
         metadata.originally_available_at = results.get_release_date()
         metadata.year = metadata.originally_available_at.year
@@ -145,7 +147,8 @@ class Jav18Agent(Agent.Movies):
         for actor in results.get_roles():
             role = metadata.roles.new()
             role.name = actor.name
-            role.photo = actor.image_url
+            if actor.image_url is not None and len(actor.image_url) > 0:
+                role.photo = actor.image_url
 
         # Posters/Background
         front_cover_high_rez = results.get_front_cover_high_rez()

@@ -18,6 +18,7 @@ class SearchResult:
         self.site_id = ""
         self.title = ""
         self.score = ""
+        self.detail_url = ""
 
     def __str__(self):
         return self.id + " (" + str(self.score) + ") :: " + self.title
@@ -123,6 +124,13 @@ def get_possible_content_ids_for_id(release_id):
     return [(split[0] + split[1].zfill(5)).lower(),
             "1" + (split[0] + split[1].zfill(5)).lower(),
             release_id.replace("-", "").lower()]
+
+
+def swap_name_order(name):
+    split = name.split(' ', 1)
+    if len(split) < 2:
+        return name
+    return split[1] + ' ' + split[0]
 
 
 class Site:

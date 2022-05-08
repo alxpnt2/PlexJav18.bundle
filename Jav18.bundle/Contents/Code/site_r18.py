@@ -94,7 +94,7 @@ class SiteR18(Site):
 
         # Actors
         actors = data["actresses"]
-        if len(actors) > 0:
+        if actors is not None and len(actors) > 0:
             for actor in actors:
                 role = MetadataRole()
                 role.name = actor["name"]
