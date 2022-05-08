@@ -27,6 +27,12 @@ R18 isn't 100% complete, so there may be some releases that won't have their ful
 JavLibrary seems to have a more complete database, but as of yet I haven't found a good way of scraping that website.
 
 ## Troubleshooting
+### How do I pick which sites are used for searching?
+Go to the Manage Library page for your Jav18 library and select Advanced. There are several options available. By default, 141Jav and R18 are the only ones enabled, but if you're not getting any results, you can try to enable the others. Note: These settings only change which options show up when matching. When compiling metadata, all possible sites are checked.
+
+### Can I change the title language?
+R18 supports both English and Chinese, so you can pick which language you would like to use in the Manage Library settings. This only affects data scraped from R18.
+
 ### Why aren't I getting any metadata?
 Make sure that you are using the correct folder structure (see above) and that your videos are named for the release number (ABC-123.mp4). If your videos are named correctly and still aren't having metadata populated for them, make sure that you can find them on R18 and 141JAV.
 
