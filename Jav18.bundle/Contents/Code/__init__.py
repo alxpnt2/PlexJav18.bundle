@@ -137,10 +137,20 @@ class Jav18Agent(Agent.Movies):
         metadata.collections.clear()
         for collection in results.get_collections():
             metadata.collections.add(collection)
-        metadata.collections.add(metadata.id.split("-")[0])
+        id_matcher = ID_PATTERN.match(metadata.id)
+        if id_matcher is not None:
+            metadata.collections.add(id_matcher.group(1))
+        else:
+            metadata.collections.add(metadata.id.split("-")[0])
 
         metadata.genres.clear()
+        real_genres = set()
         for genre in results.get_genres():
+            real_genre = get_real_genre(genre)
+            if real_genre is not None:
+                real_genres.add(real_genre)
+            Log(str(genre) + " -> " + str(real_genre))
+        for genre in real_genres:
             metadata.genres.add(genre)
 
         metadata.roles.clear()

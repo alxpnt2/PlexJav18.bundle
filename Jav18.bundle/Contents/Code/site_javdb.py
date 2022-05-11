@@ -30,8 +30,8 @@ class SiteJavDB(Site):
         searchResults = HTML.ElementFromURL(url)
         results = []  # List[SearchResult]
         for searchResult in searchResults.xpath("//main/div[contains(@class, 'row')]/div/div[contains(@class, 'card')]"):
-            id = searchResult.xpath('//h2/a')[0].text_content().strip()
-            release_date = searchResult.xpath('//figcaption')[0].text_content().strip()
+            id = searchResult.xpath('.//h2/a')[0].text_content().strip()
+            release_date = searchResult.xpath('.//figcaption')[0].text_content().strip()
             title = id + " (" + release_date + ")"
             self.DoLog(id + " : " + title)
             score = 100 - Util.LevenshteinDistance(id.lower(), release_id.lower())
@@ -74,8 +74,8 @@ class SiteJavDB(Site):
             if "title" in key:
                 result.title = value
             if "genre" in key:
-                for genre in value.split(","):
-                    result.genres.append(genre.strip())
+                for genre in detail_key.xpath('following-sibling::td[contains(@class, "tablevalue")]/span'):
+                    result.genres.append(genre.text_content().strip())
             if "series" in key:
                 result.collections.append(value)
             if "studio" in key:

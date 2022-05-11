@@ -24,10 +24,10 @@ class SiteJavGuru(Site):
         searchResults = HTML.ElementFromURL(url)
         results = []  # List[SearchResult]
         for searchResult in searchResults.xpath("//main/div[contains(@class, 'row')]/div/div"):
-            title_element = searchResult.xpath('//h2/a')[0]
+            title_element = searchResult.xpath('.//h2/a')[0]
             title = title_element.text_content().strip()
             id = title[1:title.find("]")]
-            release_date = searchResult.xpath("//div[contains(@class, 'date')]")[0].text_content().strip()
+            release_date = searchResult.xpath(".//div[contains(@class, 'date')]")[0].text_content().strip()
             title = title + " (" + release_date + ")"
             self.DoLog(id + " : " + title)
             score = 100 - Util.LevenshteinDistance(id.lower(), release_id.lower())

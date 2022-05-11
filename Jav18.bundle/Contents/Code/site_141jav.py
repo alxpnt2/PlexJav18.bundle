@@ -25,13 +25,14 @@ class Site141Jav(Site):
         page = HTML.ElementFromURL(url)
         results = []  # List[SearchResult]
         for searchResult in page.xpath('//div[contains(@class, "container")]/div[contains(@class, "card")]'):
-            id = searchResult.xpath('//h5/a')[0].text_content().strip()
-            title = searchResult.xpath('//p[contains(@class, "level")]')[0].text_content().strip()
+            id = searchResult.xpath('.//h5/a')[0].text_content().strip()
+            title_element = searchResult.xpath('.//p[contains(@class, "level")]')
+            title = title_element[0].text_content().strip() if len(title_element) > 0 else "[No Title]"
             self.DoLog(id + " : " + title)
             score = 100 - Util.LevenshteinDistance(id.lower(), release_id.replace("-", "").lower())
             result = SearchResult()
-            result.id = release_id.upper()
-            result.title = "[" + release_id + "] " + title
+            result.id = id.upper()
+            result.title = "[" + id + "] " + title
             result.score = score
             results.append(result)
         return results

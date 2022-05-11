@@ -1,4 +1,5 @@
 import os
+import re
 from genres import *
 
 
@@ -10,6 +11,7 @@ HDR = {
     'Accept-Encoding': 'none',
     'Accept-Language': 'en-US,en;q=0.8',
     'Connection': 'keep-alive'}
+ID_PATTERN = re.compile("([a-zA-Z]+)-*([0-9]+)")
 
 
 class SearchResult:
@@ -35,7 +37,8 @@ class ContentIds:
     def try_to_guess_ids(self):
         if self.fanza_id is None:
             split = self.release_id.split("-")
-            self.fanza_id = (split[0] + split[1].zfill(5)).lower()
+            if len(split) > 1:
+                self.fanza_id = (split[0] + split[1].zfill(5)).lower()
 
 
 class MetadataRole:
@@ -112,7 +115,7 @@ class MetadataResults:
         genres = set()
         for result in self.results:
             for genre in result.genres:
-                genres.add(get_real_genre(genre))
+                genres.add(genre)
         return genres
 
 
