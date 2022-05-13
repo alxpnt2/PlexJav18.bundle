@@ -62,7 +62,7 @@ class SiteJavDB(Site):
         if page is None:
             raise self.GetException("[" + self.tag() + "] Could not find page for id: " + ids.release_id)
 
-        result = MetadataResult()
+        result = MetadataResult(self)
 
         for detail_key in page.xpath('//td[contains(@class, "tablelabel")]'):
             key = detail_key.text_content().strip().lower()
@@ -96,3 +96,6 @@ class SiteJavDB(Site):
         # result.full_cover_high_rez = page.xpath('//tr[contains(@class, "moviecovertb")]//img')[0].get("src")
 
         return result
+
+    def has_actress_pictures(self):
+        return True

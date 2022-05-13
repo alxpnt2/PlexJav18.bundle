@@ -49,7 +49,7 @@ class SiteR18(Site):
         return True
 
     def do_get_data(self, ids, language):
-        result = MetadataResult()
+        result = MetadataResult(self)
 
         if ids.fanza_id is None:
             raise self.GetException("No Fanza ID present")
@@ -110,3 +110,6 @@ class SiteR18(Site):
             result.art.append(scene["large"])
 
         return result
+
+    def has_actress_pictures(self):
+        return True

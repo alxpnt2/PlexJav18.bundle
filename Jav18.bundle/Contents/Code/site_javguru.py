@@ -53,7 +53,7 @@ class SiteJavGuru(Site):
         if page is None:
             raise self.GetException("[" + self.tag() + "] Could not find page for id: " + ids.release_id)
 
-        result = MetadataResult()
+        result = MetadataResult(self)
 
         title_text = page.xpath('//h1[contains(@class, "titl")]')[0].text_content().strip()
         result.title = title_text[title_text.find("]") + 1:]

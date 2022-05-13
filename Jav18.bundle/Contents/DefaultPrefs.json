@@ -1,5 +1,6 @@
 [
   { "id": "language", "label": "Language to Use", "type": "enum",  "default": "English",  "values" : ["English", "Chinese"] },
+  { "id": "actor_pictures_only", "label": "Only use actress data from sources with photos", "type": "bool",  "default": "false"},
   { "id": "search_141jav", "label": "Search With 141Jav", "type": "bool",  "default": "true"},
   { "id": "search_onejav", "label": "Search With OneJav", "type": "bool",  "default": "true"},
   { "id": "search_r18", "label": "Search With R18", "type": "bool",  "default": "true"},

@@ -48,7 +48,8 @@ class MetadataRole:
 
 
 class MetadataResult:
-    def __init__(self):
+    def __init__(self, service):
+        self.service = service
         self.title = None
         self.studio = None
         self.directors = []
@@ -97,7 +98,12 @@ class MetadataResults:
         return self.get_first_non_empty(lambda x: x.collections)
 
     def get_roles(self):
-        return self.get_first_non_empty(lambda x: x.roles)
+        for result in self.results:
+            if Prefs["actor_pictures_only"] and not result.service.has_actress_pictures():
+                continue
+            if len(result.roles) > 0:
+                return result.roles
+        return []
 
     def get_front_cover_low_rez(self):
         return self.get_first_non_null(lambda x: x.front_cover_low_rez)
@@ -181,6 +187,9 @@ class Site:
             self.DoLog("Error trying to update metadata for " + ids.release_id)
             self.DoLog(str(e))
             return None
+
+    def has_actress_pictures(self):
+        return False
 
     def DoLog(self, text):
         Log("[" + self.tag() + "] " + text)

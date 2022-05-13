@@ -48,7 +48,7 @@ class Site141Jav(Site):
         self.DoLog(url)
         page = HTML.ElementFromURL(url)
 
-        result = MetadataResult()
+        result = MetadataResult(self)
         title_elements = page.xpath('//p[contains(@class, "level")]')
         if len(title_elements) > 0:
             result.title = title_elements[0].text_content().strip()
