@@ -1,5 +1,6 @@
 import os
 import re
+import urllib2
 from genres import *
 
 
@@ -12,6 +13,19 @@ HDR = {
     'Accept-Language': 'en-US,en;q=0.8',
     'Connection': 'keep-alive'}
 ID_PATTERN = re.compile("([a-zA-Z]+)-*([0-9]+)")
+
+
+class URL:
+    def __init__(self, *parts):
+        self.parts = parts  # str[]
+
+    def get(self, *values):
+        result = ""
+        for i in range(0, len(self.parts)):
+            result += self.parts[i]
+            if i < len(values):
+                result += urllib2.quote(values[i])
+        return result
 
 
 class SearchResult:
@@ -27,18 +41,20 @@ class SearchResult:
 
 
 class ContentIds:
-    def __init__(self, release_id):
+    def __init__(self, service_used, release_id):
+        self.service_used = service_used
         self.release_id = release_id
         self.mgs_id = None
         self.sokmil_id = None
         self.duga_id = None
         self.fanza_id = None
+        self.fanza_id_guess = None
 
     def try_to_guess_ids(self):
         if self.fanza_id is None:
             split = self.release_id.split("-")
             if len(split) > 1:
-                self.fanza_id = (split[0] + split[1].zfill(5)).lower()
+                self.fanza_id_guess = (split[0] + split[1].zfill(5)).lower()
 
 
 class MetadataRole:
@@ -163,12 +179,12 @@ class Site:
     def can_get_site_ids(self):
         return False
 
-    def do_get_site_ids(self, release_id):
+    def do_get_site_ids(self, release_id, searcher_tag):
         raise NotImplementedError
 
-    def get_site_ids(self, release_id):
+    def get_site_ids(self, release_id, searcher_tag):
         try:
-            return self.do_get_site_ids(release_id)
+            return self.do_get_site_ids(release_id, searcher_tag)
         except Exception as e:
             self.DoLog("Error trying to get site ids for " + release_id)
             self.DoLog(str(e))
@@ -190,6 +206,20 @@ class Site:
 
     def has_actress_pictures(self):
         return False
+
+    def can_search_actor_photos(self):
+        return False
+
+    def do_get_actress_photo(self, name):
+        raise NotImplementedError
+
+    def get_actress_photo(self, name):
+        try:
+            return self.do_get_actress_photo(name)
+        except Exception as e:
+            self.DoLog("Error trying to get photo for " + name)
+            self.DoLog(str(e))
+            return None
 
     def DoLog(self, text):
         Log("[" + self.tag() + "] " + text)

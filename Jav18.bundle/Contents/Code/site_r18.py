@@ -2,20 +2,10 @@ from site import *
 import urllib2
 import json
 
-SEARCH_URL = 'https://www.r18.com/common/search/searchword='
-API_URL = 'https://www.r18.com/api/v4f/contents/[ID]?lang=[LANG]&unit=USD'
+SEARCH_URL = URL('https://www.r18.com/common/search/searchword=', '/')
+API_URL = URL('https://www.r18.com/api/v4f/contents/', '?lang=', '&unit=USD')
 
 LANG_CODES = {"English": "en", "Chinese": "zh"}
-
-
-def get_search_url(release_id):
-    encodedId = urllib2.quote(release_id)
-    return SEARCH_URL + encodedId + '/'
-
-
-def get_api_url(id, language):
-    return API_URL.replace("[ID]", id).replace("[LANG]", language)
-
 
 class SiteR18(Site):
 
@@ -26,7 +16,7 @@ class SiteR18(Site):
         return Prefs["search_r18"]
 
     def do_search(self, release_id):
-        url = get_search_url(release_id)
+        url = SEARCH_URL.get(release_id)
         self.DoLog(url)
         searchResults = HTML.ElementFromURL(url)
         results = []  # List[SearchResult]
@@ -40,6 +30,7 @@ class SiteR18(Site):
             score = 100 - Util.LevenshteinDistance(id.lower(), release_id.lower())
             result = SearchResult()
             result.id = id
+            result.content_id = content_id
             result.title = "[" + id + "] " + title
             result.score = score
             results.append(result)
@@ -51,22 +42,32 @@ class SiteR18(Site):
     def do_get_data(self, ids, language):
         result = MetadataResult(self)
 
-        if ids.fanza_id is None:
+        if ids.fanza_id is None and ids.service_used == self.tag():
+            search_results = self.do_search(ids.release_id)
+            if len(search_results) > 0:
+                ids.fanza_id = search_results[0].content_id
+            else:
+                raise self.GetException("No Fanza ID present and no search results")
+        if ids.fanza_id is None and ids.fanza_id_guess is None:
             raise self.GetException("No Fanza ID present")
         language = "en" if language not in LANG_CODES else LANG_CODES[language]
         self.DoLog(language)
         data = None
-        try:
-            url = get_api_url(ids.fanza_id, language)
-            self.DoLog(url)
-            req = urllib2.Request(url, headers=HDR)
-            con = urllib2.urlopen(req)
-            web_byte = con.read()
-            webpage = web_byte.decode('utf-8')
-            data = json.loads(webpage)["data"]
-        except: pass
+        for id in [ids.fanza_id, ids.fanza_id_guess]:
+            try:
+                if id is None:
+                    continue
+                url = API_URL.get(id, language)
+                self.DoLog(url)
+                req = urllib2.Request(url, headers=HDR)
+                con = urllib2.urlopen(req)
+                web_byte = con.read()
+                webpage = web_byte.decode('utf-8')
+                data = json.loads(webpage)["data"]
+                break
+            except: pass
         if data is None:
-            raise self.GetException("[" + self.tag() + "] Could not find page for id: " + ids.fanza_id)
+            raise self.GetException("Could not find page for id: " + ids.fanza_id)
         # Log(data)
 
         id = data["dvd_id"]

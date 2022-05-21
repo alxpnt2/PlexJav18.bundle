@@ -2,18 +2,10 @@ from site import *
 import urllib2
 import json
 
-SEARCH_URL = 'https://www.javdatabase.com/?s='
-DETAIL_URL = 'https://www.javdatabase.com/movies/'
-
-
-def get_search_url(release_id):
-    encodedId = urllib2.quote(release_id)
-    return SEARCH_URL + encodedId
-
-
-def get_api_url(id):
-    encodedId = urllib2.quote(id)
-    return DETAIL_URL + encodedId + '/'
+SEARCH_URL = URL('https://www.javdatabase.com/?s=')
+DETAIL_URL = URL('https://www.javdatabase.com/movies/', '/')
+ACTRESS_DETAIL_URL = URL('https://www.javdatabase.com/idols/', '/')
+ACTRESS_SEARCH_URL = URL('https://www.javdatabase.com/?s=', '&wpessid=')
 
 
 class SiteJavDB(Site):
@@ -25,7 +17,7 @@ class SiteJavDB(Site):
         return Prefs["search_javdb"]
 
     def do_search(self, release_id):
-        url = get_search_url(release_id)
+        url = SEARCH_URL.get(release_id)
         self.DoLog(url)
         searchResults = HTML.ElementFromURL(url)
         results = []  # List[SearchResult]
@@ -52,7 +44,7 @@ class SiteJavDB(Site):
         page = None
         for id in potential_ids:
             try:
-                url = get_api_url(id)
+                url = DETAIL_URL.get(id)
                 self.DoLog(url)
                 page = HTML.ElementFromURL(url)
                 if page is not None:
@@ -99,3 +91,47 @@ class SiteJavDB(Site):
 
     def has_actress_pictures(self):
         return True
+
+    def can_search_actor_photos(self):
+        return True
+
+    def do_get_actress_photo(self, name):
+        try:
+            page = HTML.ElementFromURL(ACTRESS_DETAIL_URL.get(name.lower().replace(" ", "-")))
+        except:
+            self.DoLog('Could not reach detail page for ' + name + ', trying to search for it')
+            try:
+                page = HTML.ElementFromURL(ACTRESS_SEARCH_URL.get(name, '391488'))
+                search_results = page.xpath("//div[contains(@class, 'flex-container')]/div[contains(@class, 'card')]")
+                if len(search_results) == 0:
+                    self.DoLog('No results, tring to change the wpessid')
+                    wpessid = page.xpath("//input[contains(@placeholder, 'Idol Name')]/following-sibling::input")[0].get('value')
+                    page = HTML.ElementFromURL(ACTRESS_SEARCH_URL.get(name, wpessid))
+                    search_results = page.xpath("//div[contains(@class, 'flex-container')]/div[contains(@class, 'card')]")
+                    if len(search_results) == 0:
+                        raise self.GetException('No results when searching')
+
+                matching_url = None
+                matching_score = 95  # minimum score to only allow slight name differences
+                for result in search_results:
+                    link = result.xpath(".//h2/a")[0]
+                    result_name = link.text_content()
+                    score = 100 - Util.LevenshteinDistance(name.lower(), result_name.lower())
+                    if score > matching_score:
+                        matching_url = link.get('href')
+                        matching_score = score
+                if matching_url is not None:
+                    self.DoLog("Match: " + matching_url + " (" + str(matching_score) + ")")
+                    page = HTML.ElementFromURL(matching_url)
+                else:
+                    raise self.GetException('No search results matched name closely enough')
+            except:
+                raise self.GetException('Error trying to search for actress, aborting')
+
+        if page is None:
+            raise self.GetException("Could not find page for id: " + ids.release_id)
+
+        image_url = page.xpath('//img[@data-src][@height=500]')[0].get("data-src")
+        return image_url
+
+

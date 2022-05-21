@@ -104,12 +104,12 @@ class Jav18Agent(Agent.Movies):
         id_gatherers = [s for s in SERVICES if s.can_get_site_ids()]
         ids = None
         for gatherer in id_gatherers:
-            ids = gatherer.get_site_ids(metadata.id)
+            ids = gatherer.get_site_ids(metadata.id, searcher_tag)
             if ids is not None:
                 break
         if ids is None:
             Log("Unable to find site ids for '" + metadata.id + "'. Trying to guess ids.")
-            ids = ContentIds(metadata.id)
+            ids = ContentIds(searcher_tag, metadata.id)
             ids.try_to_guess_ids()
 
         updaters = [s for s in SERVICES if s.can_get_data()]
@@ -153,12 +153,21 @@ class Jav18Agent(Agent.Movies):
         for genre in real_genres:
             metadata.genres.add(genre)
 
+        photo_gatherers = [s for s in SERVICES if s.can_search_actor_photos()]
         metadata.roles.clear()
         for actor in results.get_roles():
             role = metadata.roles.new()
             role.name = actor.name
             if actor.image_url is not None and len(actor.image_url) > 0:
                 role.photo = actor.image_url
+            elif Prefs["find_actor_pictures"]:
+                photo_url = None
+                for gatherer in photo_gatherers:
+                    photo_url = gatherer.get_actress_photo(role.name)
+                    if photo_url is not None:
+                        break
+                if photo_url is not None:
+                    role.photo = photo_url
 
         # Posters/Background
         front_cover_high_rez = results.get_front_cover_high_rez()

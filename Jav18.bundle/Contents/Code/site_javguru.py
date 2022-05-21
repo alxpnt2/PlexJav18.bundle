@@ -2,16 +2,10 @@ from site import *
 import urllib2
 import json
 
-SEARCH_URL = 'https://jav.guru/?s='
-
-
-def get_search_url(release_id):
-    encodedId = urllib2.quote(release_id)
-    return SEARCH_URL + encodedId
+SEARCH_URL = URL('https://jav.guru/?s=')
 
 
 class SiteJavGuru(Site):
-
     def tag(self):
         return "JavGuru"
 
@@ -19,7 +13,7 @@ class SiteJavGuru(Site):
         return Prefs["search_javguru"]
 
     def do_search(self, release_id):
-        url = get_search_url(release_id)
+        url = SEARCH_URL.get(release_id)
         self.DoLog(url)
         searchResults = HTML.ElementFromURL(url)
         results = []  # List[SearchResult]

@@ -2,6 +2,9 @@
 GENRE_MAP = {
     "anal": "Anal Play",
     "butt": "Ass Lover",
+    "best": "Best / Omnibus",
+    "best, omnibus": "Best / Omnibus",
+    "omnibus": "Best / Omnibus",
     "breasts": "Beautiful Tits",
     "busty fetish": "Big Tits Lover",
     "electric massager": "Big Vibrator",
@@ -25,6 +28,9 @@ GENRE_MAP = {
     "rolling back eyes / fainting": "Eyes-Roll-Back, Fainting",
     "facials": "Facial",
     "female investigator": "Female Detective",
+    "fan appreciation": "Fan Appreciation / Home Visit",
+    "fan appreciation/ home visit": "Fan Appreciation / Home Visit",
+    "home visit": "Fan Appreciation / Home Visit",
     "evil": "Hard Sex",
     "facesitting": "Face Sitting",
     "leg fetish": "Foot Fetish",
@@ -62,6 +68,7 @@ GENRE_MAP = {
     "school girl": "School Girls",
     "s********l": "School Girls",
     "academy uniform": "School Uniform",
+    "school swimsuit": "School Swimsuits",
     "shaved": "Shaved Pussy",
     "stepmom": "Step-Mother",
     "sweat": "Sweating",
@@ -78,7 +85,7 @@ GENRE_MAP = {
 
 GENRE_IGNORE_LIST = [
     "sale", "hi-def", "4k", "actress", "avopen", "av open", "fanza", "cinema", "2010s", "other", "quality",
-    "daydreamers", "blu-ray", "tv"
+    "daydreamers", "blu-ray", "tv", "javplayer"
 ]
 
 
@@ -89,4 +96,5 @@ def get_real_genre(genre):
             return None
     if genre.lower() in GENRE_MAP:
         result = GENRE_MAP[genre.lower()]
+    result = result.strip()
     return " ".join([w.lower().capitalize() for w in result.split(" ")])

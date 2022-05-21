@@ -1,17 +1,15 @@
 from site import *
 
-SEARCH_URL = 'https://www.141jav.com/search/'
-DETAIL_URL = 'https://www.141jav.com/torrent/'
+SEARCH_URL = URL('https://www.141jav.com/search/')
+DETAIL_URL = URL('https://www.141jav.com/torrent/')
 
 
 class Site141Jav(Site):
     def get_search_url(self, release_id):
-        encoded_id = urllib2.quote(release_id.replace("-", ""))
-        return SEARCH_URL + encoded_id
+        return SEARCH_URL.get(release_id.replace("-", ""))
 
     def get_detail_url(self, release_id):
-        encoded_id = urllib2.quote(release_id.replace("-", ""))
-        return DETAIL_URL + encoded_id
+        return DETAIL_URL.get(release_id.replace("-", ""))
 
     def tag(self):
         return "141Jav"

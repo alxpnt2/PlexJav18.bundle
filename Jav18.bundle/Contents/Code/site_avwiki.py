@@ -1,18 +1,8 @@
 from site import *
 
 
-SEARCH_URL = "https://av-wiki.net/?s=[id]&post_type=product"
-DETAIL_URL = "https://av-wiki.net/"
-
-
-def get_detail_url(release_id):
-    encodedId = urllib2.quote(release_id)
-    return DETAIL_URL + encodedId + "/"
-
-
-def get_search_url(release_id):
-    encodedId = urllib2.quote(release_id)
-    return SEARCH_URL.replace("[id]", encodedId)
+SEARCH_URL = URL("https://av-wiki.net/?s=", "&post_type=product")
+DETAIL_URL = URL("https://av-wiki.net/", "/")
 
 
 class SiteAVWiki(Site):
@@ -23,7 +13,7 @@ class SiteAVWiki(Site):
         return Prefs["search_avwiki"]
 
     def do_search(self, release_id):
-        url = get_search_url(release_id)
+        url = SEARCH_URL.get(release_id)
         self.DoLog(url)
         search_page = HTML.ElementFromURL(url)
         results = []  # List[SearchResult]
@@ -42,15 +32,15 @@ class SiteAVWiki(Site):
     def can_get_site_ids(self):
         return True
 
-    def do_get_site_ids(self, release_id):
+    def do_get_site_ids(self, release_id, searcher_tag):
         page = None
         try:
-            url = get_detail_url(release_id)
+            url = DETAIL_URL.get(release_id)
             self.DoLog(url)
             page = HTML.ElementFromURL(url)
         except:
             self.DoLog("AV-Wiki doesn't use release id '" + release_id + "' in page url, trying searching for it")
-            url = get_search_url(release_id)
+            url = SEARCH_URL.get(release_id)
             self.DoLog(url)
             search_page = HTML.ElementFromURL(url)
             first_result = search_page.xpath('//div[contains(@class, "post")]/article//div[contains(@class, "read-more")]/a')[0]
@@ -59,7 +49,7 @@ class SiteAVWiki(Site):
             page = HTML.ElementFromURL(url)
 
         results = []  # List[SearchResult]
-        ids = ContentIds(release_id)
+        ids = ContentIds(searcher_tag, release_id)
         for detail_key in page.xpath('//dl[contains(@class, "dltable")]/dt'):
             key = detail_key.text_content().strip()
             value = detail_key.xpath('following-sibling::dd')[0].text_content().strip()
