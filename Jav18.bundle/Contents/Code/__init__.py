@@ -175,6 +175,7 @@ class Jav18Agent(Agent.Movies):
         full_cover_high_rez = results.get_full_cover_high_rez()
 
         poster_set = False
+        image_cropper_failed = False
         if front_cover_high_rez is not None:
             metadata.posters[front_cover_high_rez] = Proxy.Preview(
                 HTTP.Request(front_cover_high_rez, headers={'Referer': 'http://www.google.com'}).content, sort_order=1)
@@ -191,10 +192,16 @@ class Jav18Agent(Agent.Movies):
             except Exception as e:
                 Log("Error trying to get cropped image url")
                 Log(str(e))
+                image_cropper_failed = True
 
         if not poster_set and front_cover_low_rez is not None:
             metadata.posters[front_cover_low_rez] = Proxy.Preview(
                 HTTP.Request(front_cover_low_rez, headers={'Referer': 'http://www.google.com'}).content, sort_order=1)
+            poster_set = True
+
+        if not poster_set and image_cropper_failed:
+            metadata.posters[full_cover_high_rez] = Proxy.Preview(
+                HTTP.Request(full_cover_high_rez, headers={'Referer': 'http://www.google.com'}).content, sort_order=1)
 
         if full_cover_high_rez is not None:
             metadata.art[full_cover_high_rez] = Proxy.Preview(

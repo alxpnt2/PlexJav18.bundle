@@ -2,7 +2,7 @@ from site import *
 import urllib2
 import json
 
-SEARCH_URL = URL('https://www.javdatabase.com/?s=')
+SEARCH_URL = URL('https://www.javdatabase.com/?s=', '&wpessid=')
 DETAIL_URL = URL('https://www.javdatabase.com/movies/', '/')
 ACTRESS_DETAIL_URL = URL('https://www.javdatabase.com/idols/', '/')
 ACTRESS_SEARCH_URL = URL('https://www.javdatabase.com/?s=', '&wpessid=')
@@ -17,11 +17,11 @@ class SiteJavDB(Site):
         return Prefs["search_javdb"]
 
     def do_search(self, release_id):
-        url = SEARCH_URL.get(release_id)
+        url = SEARCH_URL.get(release_id, '391487')
         self.DoLog(url)
         searchResults = HTML.ElementFromURL(url)
         results = []  # List[SearchResult]
-        for searchResult in searchResults.xpath("//main/div[contains(@class, 'row')]/div/div[contains(@class, 'card')]"):
+        for searchResult in searchResults.xpath("//main/div[contains(@class, 'container')]/div[contains(@class, 'card')]"):
             id = searchResult.xpath('.//h2/a')[0].text_content().strip()
             release_date = searchResult.xpath('.//figcaption')[0].text_content().strip()
             title = id + " (" + release_date + ")"
@@ -80,12 +80,18 @@ class SiteJavDB(Site):
 
         for actress_element in page.xpath("//div[contains(@class, 'flex-item-idol')]/figure"):
             role = MetadataRole()
-            role.name = actress_element.xpath("//div[contains(@class, 'idol-name')]/a")[0].text_content().strip()
-            role.image_url = actress_element.xpath('//img')[0].get("src")
+            role.name = actress_element.xpath(".//div[contains(@class, 'idol-name')]/a")[0].text_content().strip()
+            role.image_url = actress_element.xpath('.//img')[0].get("src")
             result.roles.append(role)
 
+        for art_element in page.xpath("//main/div/a/img"):
+            result.art.append(art_element.get("data-src"))
+
         # Sometimes JavDB images can't be loaded
-        # result.full_cover_high_rez = page.xpath('//tr[contains(@class, "moviecovertb")]//img')[0].get("src")
+        result.full_cover_high_rez = page.xpath('//tr[contains(@class, "moviecovertb")]//img')[0].get("src")
+        #if "r18" not in result.full_cover_high_rez:
+        #    self.DoLog("Cover URL not from R18: " + result.full_cover_high_rez)
+        #    result.full_cover_high_rez = None
 
         return result
 
