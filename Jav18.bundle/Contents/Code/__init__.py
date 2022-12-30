@@ -26,8 +26,6 @@ except ImportError:
         from HTMLParser import HTMLParser  # python 2.x
     unescape = HTMLParser().unescape
 
-IMAGE_CROPPER_URL = "https://jav18api.herokuapp.com/crop-poster?poster-url="
-
 SERVICES = [SiteR18(), SiteJavGuru(), SiteJavDB(), SiteAVWiki(), Site141Jav(), SiteOneJav()]
 
 
@@ -97,6 +95,7 @@ class Jav18Agent(Agent.Movies):
 
     def update(self, metadata, media, lang):
         Log('****** MEDIA UPDATE *******')
+        HTTP.SetTimeout(120)
         Log("Result: " + str(metadata.id))
         searcher_tag, metadata.id = metadata.id.split("#")
         Log("ID: " + str(metadata.id))
@@ -174,40 +173,51 @@ class Jav18Agent(Agent.Movies):
         front_cover_low_rez = results.get_front_cover_low_rez()
         full_cover_high_rez = results.get_full_cover_high_rez()
 
+        header = {'Referer': 'http://www.google.com'}
+
         poster_set = False
         image_cropper_failed = False
         if front_cover_high_rez is not None:
             metadata.posters[front_cover_high_rez] = Proxy.Preview(
-                HTTP.Request(front_cover_high_rez, headers={'Referer': 'http://www.google.com'}).content, sort_order=1)
+                HTTP.Request(front_cover_high_rez, headers=header).content, sort_order=1)
             poster_set = True
 
         if not poster_set and full_cover_high_rez is not None:
+            cropped_url = Prefs["poster_cropper_url"] + full_cover_high_rez
             try:
-                cropped_url = IMAGE_CROPPER_URL + full_cover_high_rez
-                metadata.posters[cropped_url] = Proxy.Preview(HTTP.Request(cropped_url,
-                                                                           headers={
-                                                                               'Referer': 'http://www.google.com'}).content,
+                metadata.posters[cropped_url] = Proxy.Preview(HTTP.Request(cropped_url, headers=header).content,
                                                               sort_order=1)
                 poster_set = True
             except Exception as e:
                 Log("Error trying to get cropped image url")
                 Log(str(e))
-                image_cropper_failed = True
+                if "timed out" in str(e):
+                    try:
+                        Log("Timed out, trying again")
+                        metadata.posters[cropped_url] = Proxy.Preview(HTTP.Request(cropped_url, headers=header).content,
+                                                                      sort_order=1)
+                        poster_set = True
+                    except Exception as e:
+                        Log("Error trying to get cropped image url (again)")
+                        Log(str(e))
+                        image_cropper_failed = True
+                else:
+                    image_cropper_failed = True
 
         if not poster_set and front_cover_low_rez is not None:
             metadata.posters[front_cover_low_rez] = Proxy.Preview(
-                HTTP.Request(front_cover_low_rez, headers={'Referer': 'http://www.google.com'}).content, sort_order=1)
+                HTTP.Request(front_cover_low_rez, headers=header).content, sort_order=1)
             poster_set = True
 
         if not poster_set and image_cropper_failed:
             metadata.posters[full_cover_high_rez] = Proxy.Preview(
-                HTTP.Request(full_cover_high_rez, headers={'Referer': 'http://www.google.com'}).content, sort_order=1)
+                HTTP.Request(full_cover_high_rez, headers=header).content, sort_order=1)
 
         if full_cover_high_rez is not None:
             metadata.art[full_cover_high_rez] = Proxy.Preview(
-                HTTP.Request(full_cover_high_rez, headers={'Referer': 'http://www.google.com'}).content, sort_order=1)
+                HTTP.Request(full_cover_high_rez, headers=header).content, sort_order=1)
         for art in results.get_art():
             metadata.art[art] = Proxy.Preview(
-                HTTP.Request(art, headers={'Referer': 'http://www.google.com'}).content, sort_order=1)
+                HTTP.Request(art, headers=header).content, sort_order=1)
 
         Log('******* done update ****** ')

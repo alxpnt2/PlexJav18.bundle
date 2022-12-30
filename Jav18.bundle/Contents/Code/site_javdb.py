@@ -137,7 +137,7 @@ class SiteJavDB(Site):
         if page is None:
             raise self.GetException("Could not find page for id: " + ids.release_id)
 
-        image_url = page.xpath('//img[@data-src][@height=500]')[0].get("data-src")
+        image_url = page.xpath('//img[@height=500]')[0].get("src")
         return image_url
 
 

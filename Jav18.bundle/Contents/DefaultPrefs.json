@@ -1,10 +1,11 @@
 [
   { "id": "language", "label": "Language to Use", "type": "enum",  "default": "English",  "values" : ["English", "Chinese"] },
+  { "id": "poster_cropper_url", "label": "Poster-Cropper Service URL", "type": "text", "default": "https://jav18api-2.onrender.com/crop-poster?poster-url="},
   { "id": "actor_pictures_only", "label": "Only use actress data from sources with photos", "type": "bool",  "default": "false"},
   { "id": "find_actor_pictures", "label": "Try to find actress photos when site doesn't provide them", "type": "bool",  "default": "true"},
   { "id": "search_141jav", "label": "Search With 141Jav", "type": "bool",  "default": "true"},
   { "id": "search_onejav", "label": "Search With OneJav", "type": "bool",  "default": "true"},
-  { "id": "search_r18", "label": "Search With R18", "type": "bool",  "default": "true"},
+  { "id": "search_r18", "label": "Search With R18", "type": "bool",  "default": "false"},
   { "id": "search_javguru", "label": "Search With JavGuru", "type": "bool",  "default": "true"},
   { "id": "search_javdb", "label": "Search With JAV Database", "type": "bool",  "default": "false"},
   { "id": "search_avwiki", "label": "Search With AV-Wiki", "type": "bool",  "default": "false"}
