@@ -58,6 +58,9 @@ class SiteJavDB(Site):
 
         for detail_key in page.xpath('//td[contains(@class, "tablelabel")]'):
             key = detail_key.text_content().strip().lower()
+            value_element = detail_key.xpath('following-sibling::td[contains(@class, "tablevalue")]')
+            if len(value_element) == 0:
+                continue
             value = detail_key.xpath('following-sibling::td[contains(@class, "tablevalue")]')[0].text_content().strip()
             self.DoLog(key + " : " + value)
             if len(value) <= 0:
@@ -65,6 +68,9 @@ class SiteJavDB(Site):
 
             if "title" in key:
                 result.title = value
+                id_matcher = ID_PATTERN.search(result.title)
+                if id_matcher is not None:
+                    result.title = result.title.replace(id_matcher.group(0), "")
             if "genre" in key:
                 for genre in detail_key.xpath('following-sibling::td[contains(@class, "tablevalue")]/span'):
                     result.genres.append(genre.text_content().strip())
@@ -78,14 +84,14 @@ class SiteJavDB(Site):
             if "date" in key:
                 result.release_date = datetime.strptime(value, "%Y-%m-%d")
 
-        for actress_element in page.xpath("//div[contains(@class, 'flex-item-idol')]/figure"):
+        for actress_element in page.xpath("//div[contains(@class, 'idol-thumb')]"):
             role = MetadataRole()
-            role.name = actress_element.xpath(".//div[contains(@class, 'idol-name')]/a")[0].text_content().strip()
+            role.name = actress_element.xpath(".//preceding-sibling::h2")[0].text_content().strip()
             role.image_url = actress_element.xpath('.//img')[0].get("src")
             result.roles.append(role)
 
-        for art_element in page.xpath("//main/div/a/img"):
-            result.art.append(art_element.get("data-src"))
+        for art_element in page.xpath("//a[contains(@rel, 'lightbox')]"):
+            result.art.append(art_element.get("href"))
 
         # Sometimes JavDB images can't be loaded
         result.full_cover_high_rez = page.xpath('//tr[contains(@class, "moviecovertb")]//img')[0].get("src")
@@ -108,12 +114,12 @@ class SiteJavDB(Site):
             self.DoLog('Could not reach detail page for ' + name + ', trying to search for it')
             try:
                 page = HTML.ElementFromURL(ACTRESS_SEARCH_URL.get(name, '391488'))
-                search_results = page.xpath("//div[contains(@class, 'flex-container')]/div[contains(@class, 'card')]")
+                search_results = page.xpath("//div[contains(@class, 'card-body')]")
                 if len(search_results) == 0:
                     self.DoLog('No results, tring to change the wpessid')
-                    wpessid = page.xpath("//input[contains(@placeholder, 'Idol Name')]/following-sibling::input")[0].get('value')
+                    wpessid = page.xpath("//select[contains(@class, 'search-selector')]/option")[0].get('value')
                     page = HTML.ElementFromURL(ACTRESS_SEARCH_URL.get(name, wpessid))
-                    search_results = page.xpath("//div[contains(@class, 'flex-container')]/div[contains(@class, 'card')]")
+                    search_results = page.xpath("//div[contains(@class, 'card-body')]")
                     if len(search_results) == 0:
                         raise self.GetException('No results when searching')
 
@@ -137,7 +143,7 @@ class SiteJavDB(Site):
         if page is None:
             raise self.GetException("Could not find page for id: " + ids.release_id)
 
-        image_url = page.xpath('//img[@height=500]')[0].get("src")
+        image_url = page.xpath('//div[contains(@class, "idol-portrait")]//img')[0].get("src")
         return image_url
 
 
