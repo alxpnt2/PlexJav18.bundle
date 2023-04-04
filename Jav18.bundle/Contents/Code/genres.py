@@ -85,7 +85,7 @@ GENRE_MAP = {
 
 GENRE_IGNORE_LIST = [
     "sale", "hi-def", "4k", "actress", "avopen", "av open", "fanza", "cinema", "2010s", "other", "quality",
-    "daydreamers", "blu-ray", "tv", "jav", "distribution"
+    "daydreamers", "blu-ray", "tv", "jav", "distribution", "sample", "video"
 ]
 
 

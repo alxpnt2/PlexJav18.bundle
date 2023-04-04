@@ -101,6 +101,9 @@ class SiteJavDB(Site):
 
         return result
 
+    def get_actress_data_quality(self):
+        return 3
+
     def has_actress_pictures(self):
         return True
 

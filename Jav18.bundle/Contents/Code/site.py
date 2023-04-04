@@ -48,13 +48,6 @@ class ContentIds:
         self.sokmil_id = None
         self.duga_id = None
         self.fanza_id = None
-        self.fanza_id_guess = None
-
-    def try_to_guess_ids(self):
-        if self.fanza_id is None:
-            split = self.release_id.split("-")
-            if len(split) > 1:
-                self.fanza_id_guess = (split[0] + split[1].zfill(5)).lower()
 
 
 class MetadataRole:
@@ -67,6 +60,7 @@ class MetadataResult:
     def __init__(self, service):
         self.service = service
         self.title = None
+        self.title_jp = None
         self.studio = None
         self.directors = []
         self.release_date = None
@@ -99,7 +93,13 @@ class MetadataResults:
         return []
 
     def get_title(self):
-        return self.get_first_non_null(lambda x: x.title)
+        for result in self.results:
+            if result.title is not None and len(result.title) > 0:
+                return result.title
+        for result in self.results:
+            if result.title_jp is not None and len(result.title_jp) > 0:
+                return result.title_jp
+        return None
 
     def get_studio(self):
         return self.get_first_non_null(lambda x: x.studio)
@@ -114,12 +114,19 @@ class MetadataResults:
         return self.get_first_non_empty(lambda x: x.collections)
 
     def get_roles(self):
+        role_results = []
+        data_quality = 0
         for result in self.results:
             if Prefs["actor_pictures_only"] and not result.service.has_actress_pictures():
                 continue
-            if len(result.roles) > 0:
-                return result.roles
-        return []
+            if result.service.get_actress_data_quality() < data_quality or len(result.roles) == 0:
+                continue
+            data_quality = result.service.get_actress_data_quality()
+            for role in result.roles:
+                if len([x for x in role_results if x.name == role.name]) > 0:
+                    continue
+                role_results.append(role)
+        return role_results
 
     def get_front_cover_low_rez(self):
         return self.get_first_non_null(lambda x: x.front_cover_low_rez)
@@ -203,6 +210,9 @@ class Site:
             self.DoLog("Error trying to update metadata for " + ids.release_id)
             self.DoLog(str(e))
             return None
+
+    def get_actress_data_quality(self):
+        return 0
 
     def has_actress_pictures(self):
         return False

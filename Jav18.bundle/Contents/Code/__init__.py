@@ -12,6 +12,7 @@ from pprint import pprint
 
 from site_javdb import *
 from site_r18 import *
+from site_r18dev import *
 from site_141jav import *
 from site_avwiki import *
 from site_onejav import *
@@ -26,7 +27,7 @@ except ImportError:
         from HTMLParser import HTMLParser  # python 2.x
     unescape = HTMLParser().unescape
 
-SERVICES = [SiteR18(), SiteJavGuru(), SiteJavDB(), SiteAVWiki(), Site141Jav(), SiteOneJav()]
+SERVICES = [SiteR18Dev(), SiteJavGuru(), SiteJavDB(), SiteAVWiki(), Site141Jav(), SiteOneJav()]
 
 
 def title_id_to_r18_id(id):
@@ -107,9 +108,8 @@ class Jav18Agent(Agent.Movies):
             if ids is not None:
                 break
         if ids is None:
-            Log("Unable to find site ids for '" + metadata.id + "'. Trying to guess ids.")
+            Log("Unable to find site ids for '" + metadata.id + "', trying with just the release ID.")
             ids = ContentIds(searcher_tag, metadata.id)
-            ids.try_to_guess_ids()
 
         updaters = [s for s in SERVICES if s.can_get_data()]
         results = MetadataResults()
