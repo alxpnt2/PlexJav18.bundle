@@ -29,6 +29,8 @@ except ImportError:
 
 SERVICES = [SiteR18Dev(), SiteJavGuru(), SiteJavDB(), SiteAVWiki(), Site141Jav(), SiteOneJav()]
 
+CURRENT_UPDATE = "23/04/09"
+
 
 def title_id_to_r18_id(id):
     if "-" not in id:
@@ -70,6 +72,7 @@ class Jav18Agent(Agent.Movies):
 
     def search(self, results, media, lang):
         Log('******* MEDIA SEARCH ******')
+        Log("        Version: " + CURRENT_UPDATE)
         release_id = media.name.strip().replace(" ", "-")
         if not "-" in release_id and media.filename is not None:
             path, release_id = os.path.split(unencode_file_name(media.filename))
@@ -95,7 +98,8 @@ class Jav18Agent(Agent.Movies):
         Log('******* done search ****** ')
 
     def update(self, metadata, media, lang):
-        Log('****** MEDIA UPDATE *******')
+        Log('******* MEDIA UPDATE *******')
+        Log("        Version: " + CURRENT_UPDATE)
         HTTP.SetTimeout(120)
         Log("Result: " + str(metadata.id))
         searcher_tag, metadata.id = metadata.id.split("#")
