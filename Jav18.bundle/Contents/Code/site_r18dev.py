@@ -2,7 +2,7 @@ from site import *
 import urllib2
 import json
 
-SEARCH_URL = URL('https://www.r18.com/common/search/searchword=', '/')
+SEARCH_URL = URL('https://r18.dev/videos/vod/movies/detail/-/dvd_id=', '/json')
 API_URL = URL('https://r18.dev/videos/vod/movies/detail/-/combined=', '/json')
 
 class SiteR18Dev(Site):
@@ -13,21 +13,21 @@ class SiteR18Dev(Site):
     def can_search(self):
         return Prefs["search_r18dev"]
 
-    def find_potential_ids(self, id):
+    def generate_potential_ids(self, id):
         results = [id]
         split = id.split("-")
         if len(split) > 1:
             results.append((split[0] + split[1].zfill(5)).lower())
-            for prefix in ("118", "1", "h_068", "h_094", "h_237", "h_173", "h_227"):
+            for prefix in ("118", "1", "h_019", "h_068", "h_094", "h_237", "h_173", "h_227"):
                 results.append(prefix + (split[0] + split[1]).lower())
                 results.append(prefix + (split[0] + split[1].zfill(5)).lower())
         return results
 
-    def get_json(self, id):
+    def get_json(self, id, base_url=API_URL):
         if id is None:
             return None
         id = id.replace("-", "").lower()
-        url = API_URL.get(id)
+        url = base_url.get(id)
         self.DoLog(url)
         req = urllib2.Request(url, headers=HDR)
         con = urllib2.urlopen(req)
@@ -35,17 +35,27 @@ class SiteR18Dev(Site):
         webpage = web_byte.decode('utf-8')
         return json.loads(webpage)
 
-    def do_search(self, release_id):
-        for id in self.find_potential_ids(release_id):
+    def get_data_for(self, release_id):
+        try:
+            data = self.get_json(release_id, base_url=SEARCH_URL)
+            content_id = data["content_id"]
+            return self.get_json(content_id)
+        except: pass
+        for id in self.generate_potential_ids(release_id):
             try:
-                data = self.get_json(id)
-                result = SearchResult()
-                result.id = data["dvd_id"]
-                result.content_id = data["content_id"]
-                result.title = "[" + result.id + "] " + data["title_en"]
-                result.score = 100 - Util.LevenshteinDistance(result.id.lower(), release_id.lower())
-                return [result]
+                return self.get_json(id)
             except: pass
+        return None
+
+    def do_search(self, release_id):
+        data = self.get_data_for(release_id)
+        if data is not None:
+            result = SearchResult()
+            result.id = data["dvd_id"]
+            result.content_id = data["content_id"]
+            result.title = "[" + result.id + "] " + data["title_en"]
+            result.score = 100 - Util.LevenshteinDistance(result.id.lower(), release_id.lower())
+            return [result]
         return []
 
     def can_get_data(self):
@@ -53,18 +63,7 @@ class SiteR18Dev(Site):
 
     def do_get_data(self, ids, language):
         result = MetadataResult(self)
-        data = None
-        for id in [ids.release_id, ids.fanza_id]:
-            try:
-                data = self.get_json(id)
-                break
-            except: pass
-        if data is None:
-            for id in self.find_potential_ids(ids.release_id):
-                try:
-                    data = self.get_json(id)
-                    break
-                except: pass
+        data = self.get_data_for(ids.release_id)
         if data is None:
             raise self.GetException("Could not find page for id: " + ids.release_id)
         # Log(data)

@@ -21,9 +21,9 @@ class SiteJavDB(Site):
         self.DoLog(url)
         searchResults = HTML.ElementFromURL(url)
         results = []  # List[SearchResult]
-        for searchResult in searchResults.xpath("//main/div[contains(@class, 'container')]/div[contains(@class, 'card')]"):
+        for searchResult in searchResults.xpath("//main/div[contains(@class, 'row')]/div/div[contains(@class, 'card')]"):
             id = searchResult.xpath('.//h2/a')[0].text_content().strip()
-            release_date = searchResult.xpath('.//figcaption')[0].text_content().strip()
+            release_date = searchResult.xpath(".//div/a[contains(@class, 'cut-text')]")[0].text_content().strip()
             title = id + " (" + release_date + ")"
             self.DoLog(id + " : " + title)
             score = 100 - Util.LevenshteinDistance(id.lower(), release_id.lower())
