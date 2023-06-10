@@ -28,6 +28,8 @@ GENRE_MAP = {
     "rolling back eyes / fainting": "Eyes-Roll-Back, Fainting",
     "facials": "Facial",
     "female investigator": "Female Detective",
+    "g*******g": "Gang Bang",
+    "gangbang": "Gang Bang",
     "fan appreciation": "Fan Appreciation / Home Visit",
     "fan appreciation/ home visit": "Fan Appreciation / Home Visit",
     "home visit": "Fan Appreciation / Home Visit",
@@ -85,7 +87,7 @@ GENRE_MAP = {
 
 GENRE_IGNORE_LIST = [
     "sale", "hi-def", "4k", "actress", "avopen", "av open", "fanza", "cinema", "2010s", "other", "quality",
-    "daydreamers", "blu-ray", "tv", "jav", "distribution", "sample", "video"
+    "daydreamers", "blu-ray", "tv", "jav", "distribution", "sample", "video", "gw great"
 ]
 
 

@@ -96,16 +96,24 @@ class SiteR18Dev(Site):
         if actors is not None and len(actors) > 0:
             for actor in actors:
                 role = MetadataRole()
-                role.name = actor["name_romaji"]
-                role.image_url = "https://pics.dmm.co.jp/mono/actjpgs/" + actor["image_url"]
+                if "name_romaji" in actor:
+                    role.name = actor["name_romaji"]
+                else:
+                    role.name = actor["name_kanji"]
+                if "image_url" in actor:
+                    role.image_url = "https://pics.dmm.co.jp/mono/actjpgs/" + actor["image_url"]
                 self.DoLog("actor: " + role.name)
                 result.roles.append(role)
         actors = data["actors"]
         if actors is not None and len(actors) > 0:
             for actor in actors:
                 role = MetadataRole()
-                role.name = actor["name_romaji"]
-                role.image_url = "https://pics.dmm.co.jp/mono/actjpgs/" + actor["image_url"]
+                if "name_romaji" in actor:
+                    role.name = actor["name_romaji"]
+                else:
+                    role.name = actor["name_kanji"]
+                if "image_url" in actor:
+                    role.image_url = "https://pics.dmm.co.jp/mono/actjpgs/" + actor["image_url"]
                 self.DoLog("actor: " + role.name)
                 result.roles.append(role)
 
