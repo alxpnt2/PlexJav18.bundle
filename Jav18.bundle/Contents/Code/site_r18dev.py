@@ -53,6 +53,8 @@ class SiteR18Dev(Site):
             result = SearchResult()
             result.id = data["dvd_id"]
             result.content_id = data["content_id"]
+            if result.id is None:
+                result.id = result.content_id
             result.title = "[" + result.id + "] " + data["title_en"]
             result.score = 100 - Util.LevenshteinDistance(result.id.lower(), release_id.lower())
             return [result]
