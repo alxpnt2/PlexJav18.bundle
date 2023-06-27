@@ -102,7 +102,7 @@ class SiteR18Dev(Site):
                     role.name = actor["name_romaji"]
                 else:
                     role.name = actor["name_kanji"]
-                if "image_url" in actor:
+                if "image_url" in actor and actor["image_url"] is not None:
                     role.image_url = "https://pics.dmm.co.jp/mono/actjpgs/" + actor["image_url"]
                 self.DoLog("actor: " + role.name)
                 result.roles.append(role)
@@ -114,7 +114,7 @@ class SiteR18Dev(Site):
                     role.name = actor["name_romaji"]
                 else:
                     role.name = actor["name_kanji"]
-                if "image_url" in actor:
+                if "image_url" in actor and actor["image_url"] is not None:
                     role.image_url = "https://pics.dmm.co.jp/mono/actjpgs/" + actor["image_url"]
                 self.DoLog("actor: " + role.name)
                 result.roles.append(role)
