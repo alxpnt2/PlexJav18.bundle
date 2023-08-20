@@ -56,12 +56,13 @@ class SiteJavDB(Site):
 
         result = MetadataResult(self)
 
+        self.DoLog("Data")
         for detail_key in page.xpath('//td[contains(@class, "tablelabel")]'):
             key = detail_key.text_content().strip().lower()
             value_element = detail_key.xpath('following-sibling::td[contains(@class, "tablevalue")]')
             if len(value_element) == 0:
                 continue
-            value = detail_key.xpath('following-sibling::td[contains(@class, "tablevalue")]')[0].text_content().strip()
+            value = value_element[0].text_content().strip()
             self.DoLog(key + " : " + value)
             if len(value) <= 0:
                 continue
@@ -84,12 +85,16 @@ class SiteJavDB(Site):
             if "date" in key:
                 result.release_date = datetime.strptime(value, "%Y-%m-%d")
 
+        self.DoLog("Roles")
         for actress_element in page.xpath("//div[contains(@class, 'idol-thumb')]"):
             role = MetadataRole()
-            role.name = actress_element.xpath(".//preceding-sibling::h2")[0].text_content().strip()
-            role.image_url = actress_element.xpath('.//img')[0].get("src")
+            role.name = actress_element.xpath("preceding-sibling::p/a")[0].text_content().strip()
+            self.DoLog(role.name)
+            role.image_url = actress_element.xpath('a/noscript/img')[0].get("src")
+            self.DoLog(role.image_url)
             result.roles.append(role)
 
+        self.DoLog("Art")
         for art_element in page.xpath("//a[contains(@rel, 'lightbox')]"):
             result.art.append(art_element.get("href"))
 

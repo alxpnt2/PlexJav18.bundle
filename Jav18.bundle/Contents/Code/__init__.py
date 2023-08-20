@@ -29,7 +29,7 @@ except ImportError:
 
 SERVICES = [SiteR18Dev(), SiteJavGuru(), SiteJavDB(), SiteAVWiki(), Site141Jav(), SiteOneJav()]
 
-CURRENT_UPDATE = "23/04/09"
+CURRENT_UPDATE = "23/08/20"
 
 
 def title_id_to_r18_id(id):
