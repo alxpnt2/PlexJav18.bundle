@@ -62,6 +62,8 @@ class SiteJavGuru(Site):
             if len(value) <= 0:
                 continue
 
+            if "code" in key:
+                result.dvd_id = value
             if "tags" in key:
                 for genre in value.split(","):
                     result.genres.append(genre.strip())

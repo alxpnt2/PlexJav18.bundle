@@ -22,14 +22,13 @@ class SiteJavDB(Site):
         searchResults = HTML.ElementFromURL(url)
         results = []  # List[SearchResult]
         for searchResult in searchResults.xpath("//main/div[contains(@class, 'row')]/div/div[contains(@class, 'card')]"):
-            id = searchResult.xpath('.//h2/a')[0].text_content().strip()
-            release_date = searchResult.xpath(".//div/a[contains(@class, 'cut-text')]")[0].text_content().strip()
-            title = id + " (" + release_date + ")"
+            id = searchResult.xpath('.//p/a')[0].text_content().strip()
+            title = searchResult.xpath(".//div/a[contains(@class, 'cut-text')]")[0].text_content().strip()
             self.DoLog(id + " : " + title)
             score = 100 - Util.LevenshteinDistance(id.lower(), release_id.lower())
             result = SearchResult()
             result.id = id
-            result.title = "[" + id + "] " + release_date
+            result.title = "[" + id + "] " + title
             result.score = score
             results.append(result)
         return results
@@ -67,6 +66,8 @@ class SiteJavDB(Site):
             if len(value) <= 0:
                 continue
 
+            if "dvd" in key:
+                result.dvd_id = value
             if "title" in key:
                 result.title = value
                 id_matcher = ID_PATTERN.search(result.title)
@@ -99,7 +100,8 @@ class SiteJavDB(Site):
             result.art.append(art_element.get("href"))
 
         # Sometimes JavDB images can't be loaded
-        result.full_cover_high_rez = page.xpath('//tr[contains(@class, "moviecovertb")]//img')[0].get("src")
+        for image in page.xpath("//h2/following-sibling::div/a[contains(@rel, 'sponsored')]/img"):
+            result.full_cover_high_rez = image.get("data-src")
         #if "r18" not in result.full_cover_high_rez:
         #    self.DoLog("Cover URL not from R18: " + result.full_cover_high_rez)
         #    result.full_cover_high_rez = None

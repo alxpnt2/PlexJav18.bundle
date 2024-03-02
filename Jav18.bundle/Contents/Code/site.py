@@ -15,6 +15,8 @@ HDR = {
 ID_PATTERN = re.compile("([a-zA-Z]+)-*([0-9]+)")
 
 
+
+
 class URL:
     def __init__(self, *parts):
         self.parts = parts  # str[]
@@ -59,6 +61,7 @@ class MetadataRole:
 class MetadataResult:
     def __init__(self, service):
         self.service = service
+        self.dvd_id = None
         self.title = None
         self.title_jp = None
         self.studio = None
@@ -100,6 +103,9 @@ class MetadataResults:
             if result.title_jp is not None and len(result.title_jp) > 0:
                 return result.title_jp
         return None
+
+    def get_dvd_id(self):
+        return self.get_first_non_null(lambda x: x.dvd_id)
 
     def get_studio(self):
         return self.get_first_non_null(lambda x: x.studio)

@@ -3,6 +3,7 @@
   { "id": "poster_cropper_url", "label": "Poster-Cropper Service URL", "type": "text", "default": "https://jav18api-2.onrender.com/crop-poster?poster-url="},
   { "id": "actor_pictures_only", "label": "Only use actress data from sources with photos", "type": "bool",  "default": "false"},
   { "id": "find_actor_pictures", "label": "Try to find actress photos when site doesn't provide them", "type": "bool",  "default": "true"},
+  { "id": "use_content_id_for_metadata", "label": "Use the Content ID instead of the DVD ID to search for metadata (if available)", "type": "bool",  "default": "false"},
   { "id": "search_141jav", "label": "Search With 141Jav", "type": "bool",  "default": "true"},
   { "id": "search_onejav", "label": "Search With OneJav", "type": "bool",  "default": "true"},
   { "id": "search_r18", "label": "Search With R18", "type": "bool",  "default": "false"},

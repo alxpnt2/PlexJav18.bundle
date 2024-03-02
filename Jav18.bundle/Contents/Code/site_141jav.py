@@ -47,6 +47,9 @@ class Site141Jav(Site):
         page = HTML.ElementFromURL(url)
 
         result = MetadataResult(self)
+        id_elements = page.xpath('//h5[contains(@class, "title")]/a')
+        if len(id_elements) > 0:
+            result.dvd_id = id_elements[0].text_content().strip()
         title_elements = page.xpath('//p[contains(@class, "level")]')
         if len(title_elements) > 0:
             result.title = title_elements[0].text_content().strip()

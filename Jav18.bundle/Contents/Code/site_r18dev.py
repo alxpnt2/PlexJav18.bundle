@@ -53,7 +53,7 @@ class SiteR18Dev(Site):
             result = SearchResult()
             result.id = data["dvd_id"]
             result.content_id = data["content_id"]
-            if result.id is None:
+            if result.id is None or Prefs["use_content_id_for_metadata"]:
                 result.id = result.content_id
             result.title = "[" + result.id + "] " + data["title_en"]
             result.score = 100 - Util.LevenshteinDistance(result.id.lower(), release_id.lower())
@@ -70,7 +70,7 @@ class SiteR18Dev(Site):
             raise self.GetException("Could not find page for id: " + ids.release_id)
         # Log(data)
 
-        id = data["dvd_id"]
+        result.dvd_id = data["dvd_id"]
         result.title = data["title_en"]
         result.title_jp = data["title_ja"]
         result.studio = data["maker_name_en"]
