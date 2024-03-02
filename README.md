@@ -44,5 +44,8 @@ The API that generates the high-res poster doesn't have 100% up-time, so if you'
 ### I'm still not getting the right poster or my metadata isn't loading.
 If there isn't already an issue written up for your problem on the issues tab, write one up and attach your Jav18 plug-in log to the issue. Find the log folder using [this support article](https://support.plex.tv/articles/200250417-plex-media-server-log-files/). Once you are in the log folder, navigate into `PMS Plugin Logs` and grab the file called `com.plexapp.agents.jav18.log`.
 
+### What do I do if one of my videos has the same DVD ID as a different video and is getting the wrong metadata?
+You will need to find the R18.dev's unique content ID for your title (for example, '118abf009r' for 'ABF-009'). Then, in the plug-in settings, enable 'Use the Content ID instead of the DVD ID to search'. Fix your video's match and search for the content ID. It should  update with metadata for the correct title now. While the 'Use the Content ID' option is enabled, only R18.dev will be able to provide metadata, so you should disable it once you are done disambiguating your video.
+
 ## Credits
 This plugin was based on PhoenixPlexCode's Data18-Phoenix.bundle plugin [here](https://github.com/PhoenixPlexCode/Data18-Phoenix.bundle).
