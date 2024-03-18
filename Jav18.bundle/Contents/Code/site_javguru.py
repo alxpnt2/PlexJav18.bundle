@@ -76,9 +76,11 @@ class SiteJavGuru(Site):
                     result.roles.append(role)
             if "series" in key:
                 result.collections.append(value)
+            if "release date" in key:
+                result.release_date = datetime.strptime(value, '%Y-%m-%d')
 
-        release_date_text = page.xpath("//div[contains(@class, 'infometa')]//p[contains(@class, 'javstats')]")[0].text_content().split("•")[1].strip()
-        result.release_date = datetime.strptime(release_date_text, '%B %d, %Y')
+        # release_date_text = page.xpath("//div[contains(@class, 'infometa')]//p[contains(@class, 'javstats')]")[0].text_content().split("•")[1].strip()
+        # result.release_date = datetime.strptime(release_date_text, '%B %d, %Y')
 
         result.full_cover_high_rez = page.xpath('//main//img')[0].get("src")
 

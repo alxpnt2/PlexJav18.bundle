@@ -29,7 +29,7 @@ except ImportError:
 
 SERVICES = [SiteR18Dev(), SiteJavGuru(), SiteJavDB(), SiteAVWiki(), Site141Jav(), SiteOneJav()]
 
-CURRENT_UPDATE = "24/05/02"
+CURRENT_UPDATE = "24/03/18"
 
 
 def title_id_to_r18_id(id):
@@ -127,7 +127,7 @@ class Jav18Agent(Agent.Movies):
             Log("***** UPDATE FAILED! ***** ")
             return
 
-        metadata.title = "[" + results.get_dvd_id() + "] " + ("" if results.get_title() is None else results.get_title())
+        metadata.title = "[" + results.get_dvd_id(metadata.id) + "] " + ("" if results.get_title() is None else results.get_title())
         metadata.studio = results.get_studio()
         metadata.originally_available_at = results.get_release_date()
         metadata.year = metadata.originally_available_at.year

@@ -104,8 +104,9 @@ class MetadataResults:
                 return result.title_jp
         return None
 
-    def get_dvd_id(self):
-        return self.get_first_non_null(lambda x: x.dvd_id)
+    def get_dvd_id(self, metadata_id):
+        result = self.get_first_non_null(lambda x: x.dvd_id)
+        return result if result is not None else metadata_id
 
     def get_studio(self):
         return self.get_first_non_null(lambda x: x.studio)
