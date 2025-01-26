@@ -16,7 +16,7 @@ class SiteR18Dev(Site):
         return "R18.dev"
 
     def can_search(self):
-        return Prefs["search_r18dev"]
+        return Prefs["use_r18dev"] and Prefs["search_r18dev"]
 
     # def generate_potential_ids(self, id):
     #     results = [id]
@@ -67,7 +67,7 @@ class SiteR18Dev(Site):
         return []
 
     def can_get_data(self):
-        return Prefs["search_r18dev"]
+        return Prefs["use_r18dev"]
 
     def do_get_data(self, ids, language):
         result = MetadataResult(self)
