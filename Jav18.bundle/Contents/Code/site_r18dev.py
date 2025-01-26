@@ -67,7 +67,7 @@ class SiteR18Dev(Site):
         return []
 
     def can_get_data(self):
-        return True
+        return Prefs["search_r18dev"]
 
     def do_get_data(self, ids, language):
         result = MetadataResult(self)
