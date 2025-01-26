@@ -7,7 +7,7 @@
   { "id": "search_141jav", "label": "Search With 141Jav", "type": "bool",  "default": "true"},
   { "id": "search_onejav", "label": "Search With OneJav", "type": "bool",  "default": "true"},
   { "id": "search_r18", "label": "Search With R18", "type": "bool",  "default": "false"},
-  { "id": "search_r18dev", "label": "Search with R18.dev", "type": "bool", "default": "true"},
+  { "id": "search_r18dev", "label": "Search with R18.dev", "type": "bool", "default": "false"},
   { "id": "search_javguru", "label": "Search With JavGuru", "type": "bool",  "default": "true"},
   { "id": "search_javdb", "label": "Search With JAV Database", "type": "bool",  "default": "true"},
   { "id": "search_avwiki", "label": "Search With AV-Wiki", "type": "bool",  "default": "false"}

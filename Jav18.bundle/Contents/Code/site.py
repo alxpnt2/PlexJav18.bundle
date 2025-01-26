@@ -6,12 +6,20 @@ from genres import *
 
 CACHE_PATH = os.path.join(Core.app_support_path, "Plug-in Support", "Data", "com.plexapp.agents.jav18", "DataItems")
 HDR = {
-    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-    'Accept-Encoding': 'none',
-    'Accept-Language': 'en-US,en;q=0.8',
-    'Connection': 'keep-alive'}
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:127.0) Gecko/20100101 Firefox/127.0',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+    'Accept-Encoding': 'gzip, deflate, br, zstd',
+    'Accept-Language': 'en-US,en;q=0.5',
+    'Connection': 'keep-alive',
+    'DNT': '1',
+    'Priority': 'u=1',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-User': '?1',
+    'TE': 'trailers',
+    'Upgrade-Insecure-Requests': '1'
+}
 ID_PATTERN = re.compile("([a-zA-Z]+)-*([0-9]+)")
 
 
@@ -24,9 +32,9 @@ class URL:
     def get(self, *values):
         result = ""
         for i in range(0, len(self.parts)):
-            result += self.parts[i]
+            result += str(self.parts[i])
             if i < len(values):
-                result += urllib2.quote(values[i])
+                result += str(urllib2.quote(values[i]))
         return result
 
 

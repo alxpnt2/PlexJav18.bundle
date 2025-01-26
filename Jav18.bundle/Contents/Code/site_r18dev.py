@@ -5,6 +5,11 @@ import json
 SEARCH_URL = URL('https://r18.dev/videos/vod/movies/detail/-/dvd_id=', '/json')
 API_URL = URL('https://r18.dev/videos/vod/movies/detail/-/combined=', '/json')
 
+R18_DEV_HDR = {
+    'User-Agent': 'PlexJav18',
+    'accept': '*/*',
+}
+
 class SiteR18Dev(Site):
 
     def tag(self):
@@ -13,15 +18,15 @@ class SiteR18Dev(Site):
     def can_search(self):
         return Prefs["search_r18dev"]
 
-    def generate_potential_ids(self, id):
-        results = [id]
-        split = id.split("-")
-        if len(split) > 1:
-            results.append((split[0] + split[1].zfill(5)).lower())
-            for prefix in ("118", "1", "h_019", "h_068", "h_094", "h_237", "h_173", "h_227"):
-                results.append(prefix + (split[0] + split[1]).lower())
-                results.append(prefix + (split[0] + split[1].zfill(5)).lower())
-        return results
+    # def generate_potential_ids(self, id):
+    #     results = [id]
+    #     split = id.split("-")
+    #     if len(split) > 1:
+    #         results.append((split[0] + split[1].zfill(5)).lower())
+    #         for prefix in ("118", "1", "h_019", "h_068", "h_094", "h_237", "h_173", "h_227"):
+    #             results.append(prefix + (split[0] + split[1]).lower())
+    #             results.append(prefix + (split[0] + split[1].zfill(5)).lower())
+    #     return results
 
     def get_json(self, id, base_url=API_URL):
         if id is None:
@@ -29,7 +34,7 @@ class SiteR18Dev(Site):
         id = id.replace("-", "").lower()
         url = base_url.get(id)
         self.DoLog(url)
-        req = urllib2.Request(url, headers=HDR)
+        req = urllib2.Request(url, headers=R18_DEV_HDR)
         con = urllib2.urlopen(req)
         web_byte = con.read()
         webpage = web_byte.decode('utf-8')
@@ -41,10 +46,11 @@ class SiteR18Dev(Site):
             content_id = data["content_id"]
             return self.get_json(content_id)
         except: pass
-        for id in self.generate_potential_ids(release_id):
-            try:
-                return self.get_json(id)
-            except: pass
+        ### No longer doing to avoid spamming R18.dev servers
+        # for id in self.generate_potential_ids(release_id):
+        #     try:
+        #         return self.get_json(id)
+        #     except: pass
         return None
 
     def do_search(self, release_id):
